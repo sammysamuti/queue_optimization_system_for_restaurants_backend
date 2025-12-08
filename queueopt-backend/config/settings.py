@@ -18,16 +18,8 @@ SECRET_KEY = env(
 )
 DEBUG = env.bool("DJANGO_DEBUG", default=True)
 
-# Vercel deployment support
-VERCEL = os.environ.get("VERCEL") == "1"
-if VERCEL:
-    ALLOWED_HOSTS = ["*"]  # Vercel handles routing
-    CSRF_TRUSTED_ORIGINS = [
-        f"https://{os.environ.get('VERCEL_URL', '')}",
-    ]
-else:
-    ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["*"])
-    CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["*"])
+CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 
 
 INSTALLED_APPS = [
@@ -70,25 +62,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database configuration
-# Support both POSTGRES_URL (Vercel Postgres) and individual variables (Docker/local)
-if env("POSTGRES_URL", default=None):
-    # Parse POSTGRES_URL connection string (Vercel Postgres format)
-    DATABASES = {
-        "default": env.db("POSTGRES_URL")
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRES_DB", default="queueopt_db"),
+        "USER": env("POSTGRES_USER", default="queueopt_user"),
+        "PASSWORD": env("POSTGRES_PASSWORD", default="queueopt_pass"),
+        "HOST": env("POSTGRES_HOST", default="db"),  # "db" = service name in docker-compose
+        "PORT": env("POSTGRES_PORT", default="5432"),
     }
-else:
-    # Use individual database variables (Docker/local development)
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": env("POSTGRES_DB", default="queueopt_db"),
-            "USER": env("POSTGRES_USER", default="queueopt_user"),
-            "PASSWORD": env("POSTGRES_PASSWORD", default="queueopt_pass"),
-            "HOST": env("POSTGRES_HOST", default="db"),  # "db" = service name in docker-compose
-            "PORT": env("POSTGRES_PORT", default="5432"),
-        }
-    }
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -136,8 +119,8 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(env("ACCESS_TOKEN_LIFETIME", default="60"))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=int(env("REFRESH_TOKEN_LIFETIME", default="1440"))),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(env("ACCESS_TOKEN_LIFETIME"))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=int(env("REFRESH_TOKEN_LIFETIME"))),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
