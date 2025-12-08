@@ -70,16 +70,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("POSTGRES_DB", default="queueopt_db"),
-        "USER": env("POSTGRES_USER", default="queueopt_user"),
-        "PASSWORD": env("POSTGRES_PASSWORD", default="queueopt_pass"),
-        "HOST": env("POSTGRES_HOST", default="db"),  # "db" = service name in docker-compose
-        "PORT": env("POSTGRES_PORT", default="5432"),
+# Database configuration
+# Support both POSTGRES_URL (Vercel Postgres) and individual variables (Docker/local)
+if env("POSTGRES_URL", default=None):
+    # Parse POSTGRES_URL connection string (Vercel Postgres format)
+    DATABASES = {
+        "default": env.db("POSTGRES_URL")
     }
-}
+else:
+    # Use individual database variables (Docker/local development)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("POSTGRES_DB", default="queueopt_db"),
+            "USER": env("POSTGRES_USER", default="queueopt_user"),
+            "PASSWORD": env("POSTGRES_PASSWORD", default="queueopt_pass"),
+            "HOST": env("POSTGRES_HOST", default="db"),  # "db" = service name in docker-compose
+            "PORT": env("POSTGRES_PORT", default="5432"),
+        }
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [
