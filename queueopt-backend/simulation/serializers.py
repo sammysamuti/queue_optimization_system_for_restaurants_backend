@@ -145,6 +145,9 @@ class SimulationRunResponseSerializer(serializers.Serializer):
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
+    # owner_id is read-only - set automatically by the view based on authenticated user
+    owner_id = serializers.IntegerField(read_only=True)
+    
     class Meta:
         model = Restaurant
         fields = [
@@ -160,6 +163,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+        read_only_fields = ["owner_id", "subscription_plan", "subscription_status", "created_at", "updated_at"]
 
 
 class SimulationConfigSerializer(serializers.ModelSerializer):
@@ -187,6 +191,7 @@ class SimulationResultListSerializer(serializers.ModelSerializer):
     """
 
     results_summary = serializers.SerializerMethodField()
+    restaurant_name = serializers.SerializerMethodField()
 
     class Meta:
         model = SimulationResult
@@ -194,6 +199,7 @@ class SimulationResultListSerializer(serializers.ModelSerializer):
             "id",
             "simulation_id",
             "restaurant",
+            "restaurant_name",
             "config",
             "results_summary",
             "execution_time_ms",
@@ -216,6 +222,10 @@ class SimulationResultListSerializer(serializers.ModelSerializer):
             "table_utilization": util.get("table_utilization"),
             "customers_served": perf.get("customers_served"),
         }
+    
+    def get_restaurant_name(self, obj):
+        """Return restaurant name for display"""
+        return obj.restaurant.name if obj.restaurant else None
 
 
 class SimulationResultDetailSerializer(serializers.ModelSerializer):
@@ -224,6 +234,8 @@ class SimulationResultDetailSerializer(serializers.ModelSerializer):
     (includes full results JSON).
     Also supports PATCH for updating status, error_message, etc.
     """
+    
+    restaurant_name = serializers.SerializerMethodField()
 
     class Meta:
         model = SimulationResult
@@ -231,6 +243,7 @@ class SimulationResultDetailSerializer(serializers.ModelSerializer):
             "id",
             "simulation_id",
             "restaurant",
+            "restaurant_name",
             "config",
             "results",
             "execution_time_ms",
@@ -238,7 +251,11 @@ class SimulationResultDetailSerializer(serializers.ModelSerializer):
             "error_message",
             "created_at",
         ]
-        read_only_fields = ["id", "simulation_id", "restaurant", "config", "results", "execution_time_ms", "created_at"]
+        read_only_fields = ["id", "simulation_id", "restaurant", "restaurant_name", "config", "results", "execution_time_ms", "created_at"]
+    
+    def get_restaurant_name(self, obj):
+        """Return restaurant name for display"""
+        return obj.restaurant.name if obj.restaurant else None
 
 
 class ExperimentSerializer(serializers.ModelSerializer):

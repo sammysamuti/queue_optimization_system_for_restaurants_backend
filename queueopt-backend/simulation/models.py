@@ -21,12 +21,12 @@ class Restaurant(TimeStampedModel):
     city = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100, blank=True)
 
-    # We'll assume owner is a Django user (settings.AUTH_USER_MODEL)
+
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,  
+        null=False,
+        blank=False,
         related_name="owned_restaurants",
     )
 
