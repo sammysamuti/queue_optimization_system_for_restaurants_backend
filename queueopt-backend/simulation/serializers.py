@@ -49,7 +49,7 @@ class SimulationRunRequestSerializer(serializers.Serializer):
 
 
     num_tables = serializers.IntegerField(
-        min_value=10,
+        min_value=1,
         max_value=100,
         help_text="Number of tables in restaurant.",
     )
@@ -222,6 +222,7 @@ class SimulationResultDetailSerializer(serializers.ModelSerializer):
     """
     Full detail view for GET /api/simulations/{simulation_id}
     (includes full results JSON).
+    Also supports PATCH for updating status, error_message, etc.
     """
 
     class Meta:
@@ -237,6 +238,7 @@ class SimulationResultDetailSerializer(serializers.ModelSerializer):
             "error_message",
             "created_at",
         ]
+        read_only_fields = ["id", "simulation_id", "restaurant", "config", "results", "execution_time_ms", "created_at"]
 
 
 class ExperimentSerializer(serializers.ModelSerializer):

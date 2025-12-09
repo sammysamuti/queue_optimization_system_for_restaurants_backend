@@ -156,7 +156,11 @@ class SimulationListView(generics.ListAPIView):
             restaurant__owner=self.request.user
         ).order_by("-created_at")
 
-class SimulationDetailView(generics.RetrieveAPIView):
+class SimulationDetailView(generics.RetrieveUpdateAPIView):
+    """
+    GET /api/simulations/{simulation_id}/  -> get simulation details
+    PATCH /api/simulations/{simulation_id}/ -> update simulation (e.g., status, notes)
+    """
     lookup_field = "simulation_id"
     serializer_class = SimulationResultDetailSerializer
     permission_classes = [IsAuthenticated]
@@ -165,6 +169,14 @@ class SimulationDetailView(generics.RetrieveAPIView):
         return SimulationResult.objects.filter(
             restaurant__owner=self.request.user
         )
+    
+    def partial_update(self, request, *args, **kwargs):
+        # Allow updating certain fields like status, error_message, etc.
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 class SimulationDeleteView(APIView):
     permission_classes = [IsAuthenticated]
@@ -202,3 +214,16 @@ class RestaurantListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class RestaurantRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET /api/restaurants/{id}/  -> get restaurant details
+    PATCH /api/restaurants/{id}/ -> update restaurant
+    DELETE /api/restaurants/{id}/ -> delete restaurant
+    """
+    serializer_class = RestaurantSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Restaurant.objects.filter(owner=self.request.user)

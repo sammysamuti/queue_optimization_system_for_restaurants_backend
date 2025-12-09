@@ -8,7 +8,8 @@ from simulation.views import (
     SimulationListView,
     SimulationDetailView,
     SimulationDeleteView,
-    RestaurantListCreateView
+    RestaurantListCreateView,
+    RestaurantRetrieveUpdateDestroyView
 )
 
 from simulation.auth_views import (
@@ -36,6 +37,8 @@ urlpatterns = [
     path("simulations/<str:simulation_id>/", SimulationDetailView.as_view()),
     path("simulations/<str:simulation_id>/delete/", SimulationDeleteView.as_view()),
 
+    # Restaurants - detail endpoint must come before list to match correctly
+    path("restaurants/<int:pk>/", RestaurantRetrieveUpdateDestroyView.as_view(), name="restaurant-detail"),
     path("restaurants/", RestaurantListCreateView.as_view(), name="restaurant-list-create"),
 
 ]
