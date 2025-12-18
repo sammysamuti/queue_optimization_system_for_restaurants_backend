@@ -1,11 +1,10 @@
-version: "3.9"
 
 services:
   web:
     build: .
     container_name: queueopt-web
     command: >
-      sh -c " python manage.py makemigrations &&
+      sh -c "python manage.py makemigrations 2>&1 || echo 'No new migrations needed' &&
               python manage.py migrate && 
               python manage.py collectstatic --noinput &&
               gunicorn config.wsgi:application --bind 0.0.0.0:4400 --workers 3"
