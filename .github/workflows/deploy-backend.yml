@@ -25,12 +25,12 @@ jobs:
           script: |
             set -euo pipefail
 
-            # Using Home directory to avoid root permission issues
+            # Define directory
             APP_DIR="$HOME/queue-api"
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 
-            # Use HTTPS for cloning to avoid SSH key permission errors on the server
+            # Use HTTPS for cloning
             if [ ! -d ".git" ]; then 
               git clone -b main https://github.com/sammysamuti/queue_optimization_system_for_restaurants_backend.git .
             else 
@@ -38,10 +38,9 @@ jobs:
               git reset --hard origin/main
             fi
 
-            # Move into the subfolder where docker-compose.yml lives
-            cd queueopt-backend
+            # REMOVED the 'cd queueopt-backend' line because your files are in the root
 
-            # Recreate .env file inside the subfolder
+            # Recreate .env file in the current directory
             cat <<EOF > .env
             DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
             DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}
