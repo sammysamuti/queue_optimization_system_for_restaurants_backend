@@ -1,4 +1,4 @@
-name: Deploy Queue Optimization Web with Docker Compose
+name: Deploy queue-api with Docker Compose
 
 on:
   push:
