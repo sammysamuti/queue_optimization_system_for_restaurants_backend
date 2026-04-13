@@ -8,6 +8,7 @@ jobs:
   deploy-main:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
+    environment: production
 
     steps:
       - name: Checkout Code
@@ -35,7 +36,7 @@ jobs:
             grep -q github.com "$HOME/.ssh/known_hosts" || ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts"
 
             # clone OR pull in one command
-            if [ ! -d ".git" ]; then git clone -b main git@github.com:sammysamuti/queue_optimization_system_for_restaurants_backend.git .; else git pull origin main; fi
+            if [ ! -d ".git" ]; if [ ! -d ".git" ]; then git clone --depth 1 -b main https://github.com/sammysamuti/queue_optimization_system_for_restaurants_backend.git .; else git pull origin main; fi
 
             # build stamp
             mkdir -p build/web
