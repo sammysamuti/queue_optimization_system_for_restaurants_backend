@@ -40,23 +40,23 @@ jobs:
 
             # REMOVED the 'cd queueopt-backend' line because your files are in the root
 
-            # Recreate .env file with single quotes to prevent 'unbound variable' errors
-            cat <<EOF > .env
-            DJANGO_SECRET_KEY='${{ secrets.DJANGO_SECRET_KEY }}'
-            DJANGO_DEBUG='${{ secrets.DJANGO_DEBUG }}'
-            DJANGO_ALLOWED_HOSTS='${{ secrets.DJANGO_ALLOWED_HOSTS }}'
-            POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
-            POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
-            POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
-            POSTGRES_HOST='${{ secrets.POSTGRES_HOST }}'
-            POSTGRES_PORT='${{ secrets.POSTGRES_PORT }}'
-            REDIS_URL='${{ secrets.REDIS_URL }}'
-            CELERY_BROKER_URL='${{ secrets.CELERY_BROKER_URL }}'
-            CELERY_RESULT_BACKEND='${{ secrets.CELERY_RESULT_BACKEND }}'
-            API_TITLE='${{ secrets.API_TITLE }}'
-            API_VERSION='${{ secrets.API_VERSION }}'
-            ACCESS_TOKEN_LIFETIME='${{ secrets.ACCESS_TOKEN_LIFETIME }}'
-            REFRESH_TOKEN_LIFETIME='${{ secrets.REFRESH_TOKEN_LIFETIME }}'
+            # Notice the quotes around 'EOF' - this is the magic fix
+            cat <<'EOF' > .env
+            DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+            DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}
+            DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+            POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
+            REDIS_URL=${{ secrets.REDIS_URL }}
+            CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}
+            CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
+            API_TITLE=${{ secrets.API_TITLE }}
+            API_VERSION=${{ secrets.API_VERSION }}
+            ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}
+            REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}
             EOF
 
             # Deployment Sequence
