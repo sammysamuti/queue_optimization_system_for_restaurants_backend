@@ -22,17 +22,16 @@ jobs:
           script: |
             set -euo pipefail
 
-            # Define app path in home directory for easy permissions
             APP_DIR="$HOME/queue-api"
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 
-            # Setup SSH keyscan for GitHub (prevents host verification prompts)
+            # Setup SSH keyscan for GitHub
             mkdir -p "$HOME/.ssh"
             touch "$HOME/.ssh/known_hosts"
             ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
 
-            # Pull the latest code (Clones if empty, resets if already there)
+            # Pull code
             if [ ! -d ".git" ]; then
               git clone -b main git@github.com:sammysamuti/queue_optimization_system_for_restaurants_backend.git .
             else
@@ -40,7 +39,10 @@ jobs:
               git reset --hard origin/main
             fi
 
-            # Build the .env file from your GitHub Secrets
+            # IMPORTANT: Move into the subfolder where your files actually are
+            cd queueopt-backend
+
+            # Create .env inside the subfolder
             cat <<EOF > .env
             DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
             DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}
@@ -60,7 +62,6 @@ jobs:
             EOF
 
             # Deployment Sequence
-            # --remove-orphans cleans up any old/failed Nginx attempts
             docker compose down --remove-orphans
             docker image prune -f
             docker compose build --no-cache
