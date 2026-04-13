@@ -1,4 +1,4 @@
-name: Deploy queue-api with Docker Compose
+name: Deploy queue-api with Docker Compose File
 
 on:
   push:
