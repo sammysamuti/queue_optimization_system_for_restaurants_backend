@@ -25,53 +25,43 @@ jobs:
           script: |
             set -euo pipefail
 
-            APP_DIR="/app/queue-api"
+            # Using Home directory to avoid root permission issues
+            APP_DIR="$HOME/queue-api"
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 
-            # avoid first-time GitHub host prompt
-            mkdir -p "$HOME/.ssh"
-            touch "$HOME/.ssh/known_hosts"
-            grep -q github.com "$HOME/.ssh/known_hosts" || ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts"
+            # Use HTTPS for cloning to avoid SSH key permission errors on the server
+            if [ ! -d ".git" ]; then 
+              git clone -b main https://github.com/sammysamuti/queue_optimization_system_for_restaurants_backend.git .
+            else 
+              git fetch origin main
+              git reset --hard origin/main
+            fi
 
-            # clone OR pull in one command
-            if [ ! -d ".git" ]; then git clone -b main git@github.com:sammysamuti/queue_optimization_system_for_restaurants_backend.git .; else git pull origin main; fi
+            # Move into the subfolder where docker-compose.yml lives
+            cd queueopt-backend
 
-            # build stamp
-            mkdir -p build/web
-            date +%s > build/web/version.json
-
-            # Recreate .env file
+            # Recreate .env file inside the subfolder
             cat <<EOF > .env
-            # Django
             DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
             DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}
             DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}
-
-            # Database (Postgres)
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
             POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
-
-            # Redis (cache + Celery broker/result)
             REDIS_URL=${{ secrets.REDIS_URL }}
             CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}
             CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
-
-            # General API metadata
             API_TITLE=${{ secrets.API_TITLE }}
             API_VERSION=${{ secrets.API_VERSION }}
-
             ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}
             REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}
-
             EOF
 
-            # docker compose v2
-            docker compose -f docker-compose.yml down || true
+            # Deployment Sequence
+            docker compose down --remove-orphans || true
             docker image prune -f || true
-            docker builder prune -f || true
-            docker compose -f docker-compose.yml build
-            docker compose -f docker-compose.yml up -d
+            docker compose build --no-cache
+            docker compose up -d
