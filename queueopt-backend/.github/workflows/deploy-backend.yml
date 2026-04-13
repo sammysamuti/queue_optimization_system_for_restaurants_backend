@@ -1,4 +1,4 @@
-name: Deploy queue-api with Docker Compose File
+name: Deploy queue-api with Docker Compose
 
 on:
   push:
@@ -6,14 +6,12 @@ on:
 
 jobs:
   deploy-main:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: SSH into Server and Deploy Queue Optimization
+      - name: SSH into Server and Deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -21,57 +19,49 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           command_timeout: 25m
-          timeout: 60s
           script: |
             set -euo pipefail
 
-            APP_DIR="/app/queue-api"
+            # Define app path in home directory for easy permissions
+            APP_DIR="$HOME/queue-api"
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 
-            # avoid first-time GitHub host prompt
+            # Setup SSH keyscan for GitHub (prevents host verification prompts)
             mkdir -p "$HOME/.ssh"
             touch "$HOME/.ssh/known_hosts"
-            grep -q github.com "$HOME/.ssh/known_hosts" || ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts"
+            ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
 
-            # clone OR pull in one command
-            if [ ! -d ".git" ]; then git clone -b main git@github.com:sammysamuti/queue_optimization_system_for_restaurants_backend.git .; else git pull origin main; fi
+            # Pull the latest code (Clones if empty, resets if already there)
+            if [ ! -d ".git" ]; then
+              git clone -b main git@github.com:sammysamuti/queue_optimization_system_for_restaurants_backend.git .
+            else
+              git fetch origin main
+              git reset --hard origin/main
+            fi
 
-            # build stamp
-            mkdir -p build/web
-            date +%s > build/web/version.json
-
-            # Recreate .env file
+            # Build the .env file from your GitHub Secrets
             cat <<EOF > .env
-            # Django
             DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
             DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}
             DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}
-
-            # Database (Postgres)
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
             POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
-
-            # Redis (cache + Celery broker/result)
             REDIS_URL=${{ secrets.REDIS_URL }}
             CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}
             CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
-
-            # General API metadata
             API_TITLE=${{ secrets.API_TITLE }}
             API_VERSION=${{ secrets.API_VERSION }}
-
             ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}
             REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}
-
             EOF
 
-            # docker compose v2
-            docker compose -f docker-compose.yml down || true
-            docker image prune -f || true
-            docker builder prune -f || true
-            docker compose -f docker-compose.yml build
-            docker compose -f docker-compose.yml up -d
+            # Deployment Sequence
+            # --remove-orphans cleans up any old/failed Nginx attempts
+            docker compose down --remove-orphans
+            docker image prune -f
+            docker compose build --no-cache
+            docker compose up -d
