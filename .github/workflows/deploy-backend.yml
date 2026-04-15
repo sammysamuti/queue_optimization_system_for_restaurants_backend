@@ -57,9 +57,6 @@ jobs:
             API_VERSION=${{ secrets.API_VERSION }}
             ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}
             REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}
-            SERVER_HOST=${{ secrets.SERVER_HOST }}
-            SERVER_USER=${{ secrets.SERVER_USER }}
-            ${{ secrets.SERVER_SSH_KEY }}
             EOF
 
             # Deployment Sequence
