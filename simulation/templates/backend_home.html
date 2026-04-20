@@ -1,196 +1,241 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Queue Optimization API — Backend</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #252525;
-      --fg: #fafafa;
-      --muted: #a3a3a3;
-      --card: #2e2e2e;
-      --border: #404040;
-      --accent: #60a5fa;
-      --accent-dim: rgba(96, 165, 250, 0.15);
-      --radius: 10px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Inter", system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
-    .wrap {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 4rem;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-dim);
-      border: 1px solid rgba(96, 165, 250, 0.35);
-      border-radius: 999px;
-      padding: 0.35rem 0.75rem;
-      margin-bottom: 1.25rem;
-    }
-    .badge svg { width: 14px; height: 14px; opacity: 0.9; }
-    h1 {
-      font-size: clamp(1.75rem, 4vw, 2.25rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0 0 0.5rem;
-    }
-    .lead {
-      color: var(--muted);
-      font-size: 1.05rem;
-      margin: 0 0 2rem;
-      max-width: 42ch;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.35rem;
-      margin-bottom: 1.25rem;
-    }
-    .card h2 {
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--muted);
-      margin: 0 0 1rem;
-    }
-    ul.endpoints {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-    ul.endpoints li {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 0.5rem 0.75rem;
-      padding: 0.6rem 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
-    }
-    ul.endpoints li:last-child { border-bottom: none; padding-bottom: 0; }
-    ul.endpoints li:first-child { padding-top: 0; }
-    .method {
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.7rem;
-      font-weight: 500;
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      background: #3f3f3f;
-      color: #e5e5e5;
-    }
-    .method.get { color: #86efac; }
-    .method.post { color: #93c5fd; }
-    a.path {
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.82rem;
-      color: var(--accent);
-      text-decoration: none;
-      word-break: break-all;
-    }
-    a.path:hover { text-decoration: underline; }
-    .desc { color: var(--muted); font-size: 0.85rem; }
-    footer {
-      margin-top: 2rem;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-    .hint {
-      margin-top: 0.75rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="badge">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-        <line x1="8" y1="21" x2="16" y2="21" />
-        <line x1="12" y1="17" x2="12" y2="21" />
-      </svg>
-      API backend
-    </div>
-    <h1>Restaurant queue optimization</h1>
-    <p class="lead">This host runs the Django REST service for simulations, restaurants, and auth. Use the paths below or integrate from the web app.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Queue Optimization API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #252525;
+        --fg: #fafafa;
+        --muted: #a3a3a3;
+        --card: #2e2e2e;
+        --border: #404040;
+        --accent: #60a5fa;
+        --accent-dim: rgba(96, 165, 250, 0.15);
+        --radius: 10px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 4rem;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent);
+        background: var(--accent-dim);
+        border: 1px solid rgba(96, 165, 250, 0.35);
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+      .badge svg {
+        width: 14px;
+        height: 14px;
+        opacity: 0.9;
+      }
+      h1 {
+        font-size: clamp(1.75rem, 4vw, 2.25rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.5rem;
+      }
+      .lead {
+        color: var(--muted);
+        font-size: 1.05rem;
+        margin: 0 0 2rem;
+        max-width: 42ch;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem 1.35rem;
+        margin-bottom: 1.25rem;
+      }
+      .card h2 {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin: 0 0 1rem;
+      }
+      ul.endpoints {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      ul.endpoints li {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.5rem 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.9rem;
+      }
+      ul.endpoints li:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      ul.endpoints li:first-child {
+        padding-top: 0;
+      }
+      .method {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        font-weight: 500;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        background: #3f3f3f;
+        color: #e5e5e5;
+      }
+      .method.get {
+        color: #86efac;
+      }
+      .method.post {
+        color: #93c5fd;
+      }
+      a.path {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.82rem;
+        color: var(--accent);
+        text-decoration: none;
+        word-break: break-all;
+      }
+      a.path:hover {
+        text-decoration: underline;
+      }
+      .desc {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      footer {
+        margin-top: 2rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .hint {
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="badge">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+        API backend
+      </div>
+      <h1>Restaurant queue optimization</h1>
+      <p class="lead">
+        This host runs the Django REST service for simulations, restaurants, and
+        auth. Use the paths below or integrate from the web app.
+      </p>
 
-    <div class="card">
-      <h2>Quick links</h2>
-      <ul class="endpoints">
-        <li>
-          <span class="method get">GET</span>
-          <a class="path" href="/api/health/">/api/health/</a>
-          <span class="desc">Liveness &amp; version</span>
-        </li>
-        <li>
-          <span class="method post">POST</span>
-          <span class="path">/api/auth/login/</span>
-          <span class="desc">JWT obtain</span>
-        </li>
-        <li>
-          <span class="method post">POST</span>
-          <span class="path">/api/auth/register/</span>
-          <span class="desc">Create account</span>
-        </li>
-        <li>
-          <span class="method get">GET</span>
-          <a class="path" href="/admin/">/admin/</a>
-          <span class="desc">Django admin</span>
-        </li>
-      </ul>
-    </div>
+      <div class="card">
+        <h2>Quick links</h2>
+        <ul class="endpoints">
+          <li>
+            <span class="method get">GET</span>
+            <a class="path" href="/api/health/">/api/health/</a>
+            <span class="desc">Liveness &amp; version</span>
+          </li>
+          <li>
+            <span class="method post">POST</span>
+            <span class="path">/api/auth/login/</span>
+            <span class="desc">JWT obtain</span>
+          </li>
+          <li>
+            <span class="method post">POST</span>
+            <span class="path">/api/auth/register/</span>
+            <span class="desc">Create account</span>
+          </li>
+          <li>
+            <span class="method get">GET</span>
+            <a class="path" href="/admin/">/admin/</a>
+            <span class="desc">Django admin</span>
+          </li>
+        </ul>
+      </div>
 
-    <div class="card">
-      <h2>Simulations &amp; restaurants</h2>
-      <ul class="endpoints">
-        <li>
-          <span class="method post">POST</span>
-          <span class="path">/api/simulation/run/</span>
-          <span class="desc">Authenticated run</span>
-        </li>
-        <li>
-          <span class="method post">POST</span>
-          <span class="path">/api/simulation/run-guest/</span>
-          <span class="desc">Guest run</span>
-        </li>
-        <li>
-          <span class="method get">GET</span>
-          <span class="path">/api/simulations/</span>
-          <span class="desc">List saved runs</span>
-        </li>
-        <li>
-          <span class="method get">GET</span>
-          <span class="path">/api/restaurants/</span>
-          <span class="desc">Restaurants CRUD (see API docs)</span>
-        </li>
-      </ul>
-    </div>
+      <div class="card">
+        <h2>Simulations &amp; restaurants</h2>
+        <ul class="endpoints">
+          <li>
+            <span class="method post">POST</span>
+            <span class="path">/api/simulation/run/</span>
+            <span class="desc">Authenticated run</span>
+          </li>
+          <li>
+            <span class="method post">POST</span>
+            <span class="path">/api/simulation/run-guest/</span>
+            <span class="desc">Guest run</span>
+          </li>
+          <li>
+            <span class="method get">GET</span>
+            <span class="path">/api/simulations/</span>
+            <span class="desc">List saved runs</span>
+          </li>
+          <li>
+            <span class="method get">GET</span>
+            <span class="path">/api/restaurants/</span>
+            <span class="desc">Restaurants CRUD (see API docs)</span>
+          </li>
+        </ul>
+      </div>
 
-    <p class="hint">JSON APIs expect <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">Content-Type: application/json</code> unless noted otherwise.</p>
-    <footer>Queue Optimization System — backend only. Pair with the Next.js frontend for the full UI.</footer>
-  </div>
-</body>
+      <p class="hint">
+        JSON APIs expect
+        <code
+          style="font-family: 'JetBrains Mono', monospace; font-size: 0.85em"
+          >Content-Type: application/json</code
+        >
+        unless noted otherwise.
+      </p>
+      <footer>
+        Queue Optimization System — backend only. Pair with the Next.js frontend
+        for the full UI.
+      </footer>
+    </div>
+  </body>
 </html>
