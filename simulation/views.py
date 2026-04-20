@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils.timezone import now
 
 from rest_framework.views import APIView
@@ -230,3 +230,8 @@ class RestaurantRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView)
     
     def perform_update(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+def backend_home(request):
+    """Browser-friendly landing page at `/` (REST API remains under `/api/`)."""
+    return render(request, "backend_home.html")
